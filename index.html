@@ -12,10 +12,15 @@
     
     <link rel="stylesheet" href="jspsych/css/jspsych.css"></link>
     <link rel="stylesheet" href="timer_css.css"></link>
+    
 
     </head>
   
   <body>
+
+  <!-- <IMG visibility:hidden; vertical-align: middle; SRC="img/timer-5.gif" width="330" height="165"> -->
+  <!-- <div visibility:hidden; id="app"></div> -->
+  
     
   
   <script>
@@ -140,6 +145,7 @@ var timeline = [];
     var test = {
       type: 'html-button-response',
       // stimulus: '<IMG vertical-align: middle; SRC="img/timer-5.gif" width="330" height="165">',
+      stimulus: '<div  id="app"></div>',
 
       button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
       
@@ -196,5 +202,5 @@ var timeline = [];
 </script>
 
 </body>
-<script defer src="timer.js"></script>
+<script src="timer.js"></script>
 
