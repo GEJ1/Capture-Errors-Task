@@ -3,6 +3,7 @@
 const FULL_DASH_ARRAY = 283;
 const WARNING_THRESHOLD = 10;
 const ALERT_THRESHOLD = 5;
+// timer_clock = document.querySelector(".base-timer");
 
 const COLOR_CODES = {
   info: {
@@ -23,6 +24,9 @@ let timePassed = 0;
 let timeLeft = TIME_LIMIT;
 let timerInterval = null;
 let remainingPathColor = COLOR_CODES.info.color;
+
+
+
 
 document.getElementById("app").innerHTML = `
 <div class="base-timer">
@@ -64,7 +68,12 @@ function startTimer() {
     setCircleDasharray();
     setRemainingPathColor(timeLeft);
 
+    // if (timeLeft === 15) {
+     
+    //   timer_clock.style.display = "none";
+    // }
     if (timeLeft === 0) {
+      // timer_clock.style.display = "visible";
       onTimesUp();
     }
   }, 1000);

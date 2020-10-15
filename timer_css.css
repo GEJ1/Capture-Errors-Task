@@ -9,7 +9,7 @@ body {
   position: relative;
   width: 300px;
   height: 300px;
-  visibility:hidden;
+  /* visibility:hidden; */
 }
 
 .base-timer__svg {
