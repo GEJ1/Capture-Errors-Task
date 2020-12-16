@@ -6,6 +6,7 @@
         <link href="jspsych/css/jspsych.css" rel="stylesheet">
         <script src="jspsych/plugins/jspsych-html-button-response.js"></script>
         <script src="jspsych/plugins/jspsych-fullscreen.js"></script>
+        <script src="jspsych/plugins/jspsych-instructions_modified.js"></script> 
 
 
         <!-- <script src="timer.js"></script> -->
@@ -16,73 +17,38 @@
 
     <script>
 
-        // Timer function copied from:
-        // https://stackoverflow.com/questions/20618355/the-simplest-possible-javascript-countdown-timer
-        // function startTimer(duration, display) {
-        //     var start = Date.now(),
-        //         diff,
-        //         minutes,
-        //         seconds;
-        //     function timer() {
-        //         // get the number of seconds that have elapsed since 
-        //         // startTimer() was called
-        //         diff = duration - (((Date.now() - start) / 1000) | 0);
-
-        //         // does the same job as parseInt truncates the float
-        //         minutes = (diff / 60) | 0;
-        //         seconds = (diff % 60) | 0;
-
-        //         minutes = minutes < 10 ? "0" + minutes : minutes;
-        //         seconds = seconds < 10 ? "0" + seconds : seconds;
-        //         display = document.querySelector('#time');
-        //         if (display !== null) {
-        //             display.innerHTML = minutes + ":" + seconds;
-        //         }
-
-        //        // display.textContent = minutes + ":" + seconds; 
-               
-
-        //         if (diff <= 0) {
-        //             // add one second so that the count down starts at the full duration
-        //             // example 05:00 not 04:59
-        //             start = Date.now() + 1000;
-        //      }
-        //     };
-        //     // we don't want to wait a full second before the timer starts
-        //     timer();
-        //     setInterval(timer, 1000);
-        // }
+        let timerInterval;
+        const TIME_LIMIT = 10;
+        let timeline = [];
 
         function setUpEvents(){
-
                 const FULL_DASH_ARRAY = 283;
-                const WARNING_THRESHOLD = 10;
-                const ALERT_THRESHOLD = 5;
-                // timer_clock = document.querySelector(".base-timer");
+                const WARNING_THRESHOLD = TIME_LIMIT/2;
+                const ALERT_THRESHOLD = TIME_LIMIT/3;
 
                 const COLOR_CODES = {
-                info: {
-                    color: "green"
-                },
-                warning: {
-                    color: "orange",
-                    threshold: WARNING_THRESHOLD
-                },
-                alert: {
-                    color: "red",
-                    threshold: ALERT_THRESHOLD
-                }
+                    info: {
+                        color: "green"
+                    },
+                    warning: {
+                        color: "orange",
+                        threshold: WARNING_THRESHOLD
+                    },
+                    alert: {
+                        color: "red",
+                        threshold: ALERT_THRESHOLD
+                    }
                 };
 
-                const TIME_LIMIT = 20;
+                
                 let timePassed = 0;
                 let timeLeft = TIME_LIMIT;
-                let timerInterval = null;
                 let remainingPathColor = COLOR_CODES.info.color;
 
 
                 document.getElementById("app").innerHTML = `
                 <div class="base-timer">
+
                 <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <g class="base-timer__circle">
                     <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
@@ -99,96 +65,75 @@
                     ></path>
                     </g>
                 </svg>
-                <span id="base-timer-label" class="base-timer__label">${formatTime(
-                    timeLeft
-                )}</span>
+                <span id="base-timer-label" class="base-timer__label">${formatTime(timeLeft)}</span>
                 </div>
                 `;
 
                 startTimer();
 
                 function onTimesUp() {
-                clearInterval(timerInterval);
+                    clearInterval(timerInterval);
+                    console.log('onTimesUp')
                 }
 
                 function startTimer() {
-                timerInterval = setInterval(() => {
-                    timePassed = timePassed += 1;
-                    timeLeft = TIME_LIMIT - timePassed;
-                    document.getElementById("base-timer-label").innerHTML = formatTime(
-                    timeLeft
-                    );
-                    setCircleDasharray();
-                    setRemainingPathColor(timeLeft);
 
-                    // if (timeLeft === 15) {
+                    timerInterval = setInterval(() => {
+                        let end_trial = 0;
+                        timePassed = timePassed += 1;
+                        // console.log(timePassed)
+                        timeLeft = TIME_LIMIT - timePassed;
+                        document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+                        setCircleDasharray();
+                        setRemainingPathColor(timeLeft);
+                        console.log(timeLeft)
+                        if (timeLeft === 0) {
+                            console.log('if')
+                            onTimesUp();
+                        }
+                    }, 1000);
                     
-                    //   timer_clock.style.display = "none";
-                    // }
-                    if (timeLeft === 0) {
-                    // timer_clock.style.display = "visible";
-                    onTimesUp();
-                    }
-                }, 1000);
                 }
 
                 function formatTime(time) {
-                const minutes = Math.floor(time / 60);
-                let seconds = time % 60;
+                    const minutes = Math.floor(time / 60);
+                    let seconds = time % 60;
 
-                if (seconds < 10) {
-                    seconds = `0${seconds}`;
-                }
-
-                return `${minutes}:${seconds}`;
+                    return `${minutes}:${seconds}`;
                 }
 
                 function setRemainingPathColor(timeLeft) {
-                const { alert, warning, info } = COLOR_CODES;
-                if (timeLeft <= alert.threshold) {
-                    document
-                    .getElementById("base-timer-path-remaining")
-                    .classList.remove(warning.color);
-                    document
-                    .getElementById("base-timer-path-remaining")
-                    .classList.add(alert.color);
-                } else if (timeLeft <= warning.threshold) {
-                    document
-                    .getElementById("base-timer-path-remaining")
-                    .classList.remove(info.color);
-                    document
-                    .getElementById("base-timer-path-remaining")
-                    .classList.add(warning.color);
-                }
+                    const { alert, warning, info } = COLOR_CODES;
+                    if (timeLeft <= alert.threshold) {
+                        document.getElementById("base-timer-path-remaining").classList.remove(warning.color);
+                        document.getElementById("base-timer-path-remaining").classList.add(alert.color);
+                    } else if (timeLeft <= warning.threshold) {
+                        document.getElementById("base-timer-path-remaining").classList.remove(info.color);
+                        document.getElementById("base-timer-path-remaining").classList.add(warning.color);
+                    }
                 }
 
                 function calculateTimeFraction() {
-                const rawTimeFraction = timeLeft / TIME_LIMIT;
-                return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
-                }
+                    const rawTimeFraction = timeLeft / TIME_LIMIT;
+                    return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+                    }
 
                 function setCircleDasharray() {
-                const circleDasharray = `${(
-                    calculateTimeFraction() * FULL_DASH_ARRAY
-                ).toFixed(0)} 283`;
-                document
-                    .getElementById("base-timer-path-remaining")
-                    .setAttribute("stroke-dasharray", circleDasharray);
-                }
+                    const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
+                    document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
+                    }
                 }
 
-        var timeline = [];
 
-        /* define rotate trial */
+        // Rotate trial 
         var rotate = {
-        type: "html-button-response",
-        stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono.</p><br><IMG vertical-align: middle; SRC="img/rotate.gif">',
-        // prompt: '',
-        choices: ['Continuar'],
+            type: "html-button-response",
+            stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono.</p><br><IMG vertical-align: middle; SRC="img/rotate.gif"><p vertical-align: middle> Luego presione en continuar <p>',
+            choices: ['Continuar'],
         };
-        // timeline.push(rotate);
 
-        //Full screen
+
+        // Full screen trial
         var fullScreen = {
             type: 'fullscreen',
             fullscreen_mode: true,
@@ -196,29 +141,48 @@
             button_label: 'Continuar a pantalla completa'    
         } 
 
-        var start_screen = {
-            type: 'html-keyboard-response',
-            stimulus: 'So it begins.'
+        // Instructions trial
+        var instructions = {
+            type: 'instructions',
+            pages: [
+                    ` 
+                    <p style='font-size:150%;color:black'>  Instrucciones página 1.<br>` ,
+
+                    `<p style='font-size:150%;color:black'>  Instrucciones página 2.<br>`,
+
+                    `<p style='font-size:150%;color:black'>  Instrucciones página 3.<br>`
+                    ],
+
+            show_clickable_nav: true,
+            show_page_number: true,
+            button_label_previous: 'Anterior',
+            button_label_next: 'Siguiente',
+            page_label: 'Página'
         }
-        // timeline.push(start_screen)
 
         var stopwatch = {
             on_load:  function() {
                 setUpEvents()
-                
-                },
+            },
+            
             type: 'html-button-response',
             stimulus: '<div  id="app"></div>',
-            choices: ['A', 'B'],
+            choices: ['ABC', 'CBA'],
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
-      
-             margin_horizontal: '36px'
+            margin_horizontal: '20px',
+            margin_vertical: '36px',
+            on_finish: function(startTimer) {
+                console.log('on_finish')
+                clearInterval(timerInterval)
+                // clearInterval(timerInterval)
+            }
         }
-        // timeline.push(stopwatch)
 
         jsPsych.init({
-            timeline: [stopwatch,stopwatch],
+            // timeline: [fullScreen,rotate,instructions,stopwatch,stopwatch],
+            timeline: [stopwatch,stopwatch,stopwatch],
             on_finish: function(){
+
                 jsPsych.data.displayData();
             }
         })
