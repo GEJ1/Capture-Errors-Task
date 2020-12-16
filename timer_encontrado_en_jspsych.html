@@ -21,6 +21,7 @@
         const TIME_LIMIT = 10;
         let timeline = [];
 
+
         function setUpEvents(){
                 const FULL_DASH_ARRAY = 283;
                 const WARNING_THRESHOLD = TIME_LIMIT/2;
@@ -74,6 +75,8 @@
                 function onTimesUp() {
                     clearInterval(timerInterval);
                     console.log('onTimesUp')
+                    
+                    // Aca tiene que ir algo para pasar de trial
                 }
 
                 function startTimer() {
@@ -126,10 +129,17 @@
 
 
         // Rotate trial 
-        var rotate = {
+        let rotate = {
+            on_load:  function() {
+                window.addEventListener("orientationchange", function(event) {
+                    if (event.target.screen.orientation.angle){
+                        jsPsych.finishTrial();
+                    }
+                }
+            )}, 
             type: "html-button-response",
             stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono.</p><br><IMG vertical-align: middle; SRC="img/rotate.gif"><p vertical-align: middle> Luego presione en continuar <p>',
-            choices: ['Continuar'],
+            choices: ['Continuar']
         };
 
 
@@ -163,18 +173,17 @@
         var stopwatch = {
             on_load:  function() {
                 setUpEvents()
+                
             },
-            
             type: 'html-button-response',
             stimulus: '<div  id="app"></div>',
             choices: ['ABC', 'CBA'],
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
             margin_horizontal: '20px',
             margin_vertical: '36px',
+            trial_duration: TIME_LIMIT*1000,
             on_finish: function(startTimer) {
-                console.log('on_finish')
                 clearInterval(timerInterval)
-                // clearInterval(timerInterval)
             }
         }
 
@@ -184,6 +193,8 @@
             on_finish: function(){
 
                 jsPsych.data.displayData();
+                //Go to URL
+                // location.href = "https://gej1.github.io/"
             }
         })
 
