@@ -122,7 +122,7 @@ var timeline = [];
     // 48 = 0 = primer boton , 49 = 1 = segundo boton
 
     var test_stimuli = [
-      { stimulus: '<div style="font-size:160px;">SR</div>', data: { test_part: 'test', correct_response: '48' } },
+      { stimulus: '<div style="font-size:160px;">XX</div>', data: { test_part: 'test', correct_response: '48' } },
       
       { stimulus: '<div style="font-size:160px;">RS</div>', data: { test_part: 'test', correct_response: '49' } }
     ];
@@ -170,9 +170,9 @@ var timeline = [];
 
     var test_procedure = {
       timeline: [fixation, presentation, test],
-      timeline_variables: test_stimuli,
-      repetitions: 3,
-      randomize_order: true
+      timeline_variables: test_stimuli
+      // repetitions: 3,
+      // randomize_order: true
     }
 
     /* define debrief */
@@ -203,9 +203,9 @@ var timeline = [];
       // timeline: [rotate,fullScreen,explanation,test_procedure,debrief_block],
       timeline: [rotate,fullScreen,test_procedure,debrief_block],
       on_finish: function() {
-        // jsPsych.data.displayData();
+        jsPsych.data.displayData();
         //Go to URL
-        location.href = "https://gej1.github.io/"
+        // location.href = "https://gej1.github.io/"
       }
     });
 </script>

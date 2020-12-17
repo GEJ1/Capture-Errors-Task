@@ -84,7 +84,6 @@
                     timerInterval = setInterval(() => {
                         let end_trial = 0;
                         timePassed = timePassed += 1;
-                        // console.log(timePassed)
                         timeLeft = TIME_LIMIT - timePassed;
                         document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
                         setCircleDasharray();
@@ -126,19 +125,20 @@
                     document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
                     }
                 }
-
+        
 
         // Rotate trial 
         let rotate = {
-            on_load:  function() {
+            on_load:  rotation = function() {
                 window.addEventListener("orientationchange", function(event) {
                     if (event.target.screen.orientation.angle){
                         jsPsych.finishTrial();
+                        window.removeEventListener("orientationchange", rotation)
                     }
                 }
             )}, 
             type: "html-button-response",
-            stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono.</p><br><IMG vertical-align: middle; SRC="img/rotate.gif"><p vertical-align: middle> Luego presione en continuar <p>',
+            stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono para continuar </p><br><IMG vertical-align: middle; SRC="img/rotate.gif">',
             choices: ['Continuar']
         };
 
@@ -170,26 +170,48 @@
             page_label: 'Página'
         }
 
+        var fixation = {
+            type: 'html-keyboard-response',
+            stimulus: '<div style="font-size:60px;">+</div>',
+            // stimulus: '<div style="font-size:60px;">+</div>',
+            choices: jsPsych.NO_KEYS,
+            trial_duration: 500,
+            data: {test_part: 'fixation'}
+            }
+
         var stopwatch = {
             on_load:  function() {
                 setUpEvents()
                 
             },
             type: 'html-button-response',
-            stimulus: '<div  id="app"></div>',
-            choices: ['ABC', 'CBA'],
+            stimulus: '<center><strong><P style="font-size:60px;" >ABC</P></strong><div id="app"></div></center>',
+            choices: ['ABC','BCA'],
+            
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
             margin_horizontal: '20px',
-            margin_vertical: '36px',
+            margin_vertical: '16px',
             trial_duration: TIME_LIMIT*1000,
             on_finish: function(startTimer) {
                 clearInterval(timerInterval)
             }
         }
 
+
+        // let procedure = {
+        //     timeline: [fixation,stopwatch],
+        //     timeline_variables: [
+        //         {choices: function(){
+        //             ['ABC', 'CBA']}
+        //         },
+        //         {choices: ['XXX', 'YYY']} 
+        //     ]
+        // }
+
         jsPsych.init({
-            // timeline: [fullScreen,rotate,instructions,stopwatch,stopwatch],
-            timeline: [stopwatch,stopwatch,stopwatch],
+            timeline: [fixation,stopwatch,fixation,stopwatch],
+            // timeline: [fullScreen,rotate,instructions,fixation,stopwatch,fixation,stopwatch],
+            // timeline: [stopwatch,stopwatch,stopwatch],
             on_finish: function(){
 
                 jsPsych.data.displayData();
