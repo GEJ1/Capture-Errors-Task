@@ -10,7 +10,7 @@
 
 
         <!-- <script src="timer.js"></script> -->
-        <link rel="stylesheet" href="timer_css.css"></link>
+        <link rel="stylesheet" href="timer.css"></link>
     </head>
 
     <body></body>
@@ -133,7 +133,6 @@ let timerInterval;
         // Rotate trial 
             let rotate = {
             on_load: function() {
-                
                 let orientationHandler = function(){
                     if (event.target.screen.orientation.angle){
                         window.removeEventListener("orientationchange", orientationHandler)
@@ -175,14 +174,22 @@ let timerInterval;
             page_label: 'Página'
         }
 
+            // Stimuli to be presented. This can be automated based on a stimuli list.
+            var stimuli = [
+            { stimulus: "<center><strong><P style='font-size:40px;'> ASD </P></strong><div id='app'></div></center>", choices: ['ABC', 'BCA']},
+            { stimulus: "<center><strong><P style='font-size:40px;'> EDF </P></strong><div id='app'></div></center>", choices: ['EDF', 'FDE']}
+            ];
+
+
+
         var stopwatch = {
             on_load:  function() {
                 setUpEvents()
                 
             },
             type: 'html-button-response',
-            stimulus: '<center><strong><P style="font-size:40px;" >ABC</P></strong><div id="app"></div></center>',
-            choices: ['ABC','BCA'],
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            choices: jsPsych.timelineVariable('choices'),
             
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
             margin_horizontal: '20px',
@@ -193,9 +200,16 @@ let timerInterval;
             }
         }
 
+        var test_procedure = {
+            timeline: [stopwatch],
+            timeline_variables: stimuli,
+            randomize_order: true,
+            repetitions: 2
+            }
+
         jsPsych.init({
             // timeline: [fixation,stopwatch,fixation,stopwatch],
-            timeline: [fullScreen,rotate,instructions,stopwatch,stopwatch,stopwatch],
+            timeline: [fullScreen,rotate,instructions,test_procedure],
             // timeline: [stopwatch,stopwatch,stopwatch],
             show_progress_bar: true,
             message_progress_bar: 'Porcentaje completado',
