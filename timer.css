@@ -58,3 +58,45 @@ body {
   justify-content: center;
   font-size: 48px;
 }
+
+:root {
+  background: #fff;
+}
+
+span#procent {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 50px;
+  transform: translate(-50%, -50%);
+  color: #3949ab;
+}
+
+span#procent::after {
+  content: "%";
+}
+span#procent2 {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 30px;
+  transform: translate(-50%, -50%);
+  color: #3949ab;
+}
+
+span#procent2::after {
+  content: "ms";
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.responseText {
+  color: #3949ab;
+  font-weight: 700;
+}

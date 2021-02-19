@@ -8,8 +8,7 @@
         <script src="jspsych/plugins/jspsych-fullscreen.js"></script>
         <script src="jspsych/plugins/jspsych-instructions_modified.js"></script> 
         <script src="jspsych/plugins/jspsych-survey-html-form.js"></script> 
-
-        
+        <script src="stimuli.js"></script> 
 
 
         <!-- <script src="timer.js"></script> -->
@@ -21,7 +20,10 @@
     <script>
 
 // ID
-let subject_id = jsPsych.randomization.randomID(10);
+let subject_id = jsPsych.randomization.randomID(15);
+
+//task explanation images
+images = ['Ej_1.png','Ej_2.png','Ej_3.png','Ej_4.png']
 
 // SAVE dimensions
 jsPsych.data.addProperties({'ID': subject_id})
@@ -30,112 +32,113 @@ jsPsych.data.addProperties({'screenY': screen.height});
 jsPsych.data.addProperties({'innerX': window.innerWidth});
 jsPsych.data.addProperties({'innerY': window.innerHeight});
 
+
 let timerInterval;
-        const TIME_LIMIT = 4;
-        let timeline = [];
+let timeline = [];
 
-        function setUpEvents(){
-                const FULL_DASH_ARRAY = 283;
-                const WARNING_THRESHOLD = TIME_LIMIT/2;
-                const ALERT_THRESHOLD = TIME_LIMIT/3;
+// Parameters
+const TIME_LIMIT = 4;
+const MARGIN_HORIZ = '80px';
 
-                const COLOR_CODES = {
-                    info: {
-                        color: "green"
-                    },
-                    warning: {
-                        color: "orange",
-                        threshold: WARNING_THRESHOLD
-                    },
-                    alert: {
-                        color: "red",
-                        threshold: ALERT_THRESHOLD
-                    }
-                };
+// timer
+// Credit: Mateusz Rybczonec
+function setUpEvents(){
+        const FULL_DASH_ARRAY = 283;
+        const WARNING_THRESHOLD = TIME_LIMIT/2;
+        const ALERT_THRESHOLD = TIME_LIMIT/3;
 
-                
-                let timePassed = 0;
-                let timeLeft = TIME_LIMIT;
-                let remainingPathColor = COLOR_CODES.info.color;
+        const COLOR_CODES = {
+            info: {
+                color: "green"
+            },
+            warning: {
+                color: "orange",
+                threshold: WARNING_THRESHOLD
+            },
+            alert: {
+                color: "red",
+                threshold: ALERT_THRESHOLD
+            }
+        };
+        
+        let timePassed = 0;
+        let timeLeft = TIME_LIMIT;
+        let remainingPathColor = COLOR_CODES.info.color;
 
 
-                document.getElementById("app").innerHTML = `
-                <div class="base-timer">
+        document.getElementById("app").innerHTML = `
+        <div class="base-timer">
 
-                <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <g class="base-timer__circle">
-                    <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
-                    <path
-                        id="base-timer-path-remaining"
-                        stroke-dasharray="283"
-                        class="base-timer__path-remaining ${remainingPathColor}"
-                        d="
-                        M 50, 50
-                        m -45, 0
-                        a 45,45 0 1,0 90,0
-                        a 45,45 0 1,0 -90,0
-                        "
-                    ></path>
-                    </g>
-                </svg>
-                <span id="base-timer-label" class="base-timer__label">${formatTime(timeLeft)}</span>
-                </div>
-                `;
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path
+                id="base-timer-path-remaining"
+                stroke-dasharray="283"
+                class="base-timer__path-remaining ${remainingPathColor}"
+                d="
+                M 50, 50
+                m -45, 0
+                a 45,45 0 1,0 90,0
+                a 45,45 0 1,0 -90,0
+                "
+            ></path>
+            </g>
+        </svg>
+        <span id="base-timer-label" class="base-timer__label">${formatTime(timeLeft)}</span>
+        </div>
+        `;
 
-                startTimer();
+        startTimer();
 
-                function onTimesUp() {
-                    clearInterval(timerInterval);
-                    console.log('onTimesUp')
+        function onTimesUp() {
+            clearInterval(timerInterval);
+        }
+
+        function startTimer() {
+
+            timerInterval = setInterval(() => {
+                let end_trial = 0;
+                timePassed = timePassed += 1;
+                timeLeft = TIME_LIMIT - timePassed;
+                document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+                setCircleDasharray();
+                setRemainingPathColor(timeLeft);
+                if (timeLeft === 0) {
+                    onTimesUp();
                 }
+            }, 1000);
+            
+        }
+        
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            let seconds = time % 60;
 
-                function startTimer() {
+            return `${minutes}:${seconds}`;
+        }
 
-                    timerInterval = setInterval(() => {
-                        let end_trial = 0;
-                        timePassed = timePassed += 1;
-                        // console.log(timePassed)
-                        timeLeft = TIME_LIMIT - timePassed;
-                        document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
-                        setCircleDasharray();
-                        setRemainingPathColor(timeLeft);
-                        console.log(timeLeft)
-                        if (timeLeft === 0) {
-                            console.log('if')
-                            onTimesUp();
-                        }
-                    }, 1000);
-                    
-                }
+        function setRemainingPathColor(timeLeft) {
+            const { alert, warning, info } = COLOR_CODES;
+            if (timeLeft <= alert.threshold) {
+                document.getElementById("base-timer-path-remaining").classList.remove(warning.color);
+                document.getElementById("base-timer-path-remaining").classList.add(alert.color);
+            } else if (timeLeft <= warning.threshold) {
+                document.getElementById("base-timer-path-remaining").classList.remove(info.color);
+                document.getElementById("base-timer-path-remaining").classList.add(warning.color);
+            }
+        }
 
-                function formatTime(time) {
-                    const minutes = Math.floor(time / 60);
-                    let seconds = time % 60;
+        function calculateTimeFraction() {
+            const rawTimeFraction = timeLeft / TIME_LIMIT;
+            return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+            }
 
-                    return `${minutes}:${seconds}`;
-                }
-
-                function setRemainingPathColor(timeLeft) {
-                    const { alert, warning, info } = COLOR_CODES;
-                    if (timeLeft <= alert.threshold) {
-                        document.getElementById("base-timer-path-remaining").classList.remove(warning.color);
-                        document.getElementById("base-timer-path-remaining").classList.add(alert.color);
-                    } else if (timeLeft <= warning.threshold) {
-                        document.getElementById("base-timer-path-remaining").classList.remove(info.color);
-                        document.getElementById("base-timer-path-remaining").classList.add(warning.color);
-                    }
-                }
-
-                function calculateTimeFraction() {
-                    const rawTimeFraction = timeLeft / TIME_LIMIT;
-                    return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
-                    }
-
-                function setCircleDasharray() {
-                    const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
-                    document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
-                    }
-                }
+        function setCircleDasharray() {
+            const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
+            document.getElementById("base-timer-path-remaining").setAttribute("stroke-dasharray", circleDasharray);
+            }
+        }
 
         // Rotate trial 
             let rotate = {
@@ -162,7 +165,7 @@ let timerInterval;
         } 
 
     // Welcome
-    var welcome_block = {
+    var welcome_block = { 
             data: {
                 screen_id: "Bienvenidx"
             },
@@ -171,13 +174,13 @@ let timerInterval;
             html: 
                 `<table>
                     <tr>
-                    <td align="right">Edad:</td>
+                    <td align="right">Edad:</td>    
                     <td align="left"><input name="age" type="number" required="" /></td>
                     </tr>
                     <tr>
                     <td align="right">Género:</td>
                     <td align="left"><input list="gender" id="gender-choice" name="gender-choice" required="" /><datalist id="gender"> 
-                    <option value="MASCULINO"> <option value="FEMENINO"> <option value="OTRO"></datalist></td>
+                    <option value="Varón"> <option value="Mujer"> <option value="No binario"> <option value="Género fluido"> <option value="Ninguna de estas opciones me identifica"> <option value="Prefiero no decirlo"></datalist></td>
                     </tr>
                     <tr>
                     <td align="right">Máximo nivel educativo alcanzado:</td>
@@ -200,7 +203,9 @@ let timerInterval;
                     `<p style='font-size:100%;color:black'>  A CONTINUACIÓN, VAS A ENCONTRAR UNA SERIE DE NÚMEROS. 
                     Presiona la opción que sea igual al modelo. Por ejemplo, si el modelo es <strong> 1 3 </strong> la opción correcta sería <strong>1 3</strong>. 
                     En algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, selecciona cualquiera de los estímulos. 
-                    En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta.`
+                    En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta.`,
+
+                    ` <img style='width: 70%;' src="img/${images[0]}" alt="">`
                     ],
             show_clickable_nav: true,
             show_page_number: true,
@@ -208,6 +213,8 @@ let timerInterval;
             button_label_next: 'Siguiente',
             page_label: 'Página'
         }
+        
+        
 
         var instructions_2 = {
             type: 'instructions',
@@ -218,7 +225,9 @@ let timerInterval;
                     Los mismos números, pero de atrás hacia adelante. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, 
                     cuando ese sea el caso, 
                     selecciona cualquiera de los estímulos. En la pantalla habrá también un círculo que mostrará el tiempo que tienes 
-                    disponible para dar tu respuesta.>`
+                    disponible para dar tu respuesta. <p>`,
+                    
+                    ` <img style='width: 70%;' src="img/${images[1]}" alt="">`
                     ],
             show_clickable_nav: true,
             show_page_number: true,
@@ -226,45 +235,73 @@ let timerInterval;
             button_label_next: 'Siguiente',
             page_label: 'Página'
         }
+        
+        var instructions_3 = {
+            type: 'instructions',
+            pages: [
+            `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE LETRAS Y NÚMEROS. 
+            Presiona la opción que ordene primero los números de menor a mayor y luego las letras en orden alfabético. 
+            Por ejemplo si el modelo es <strong>L4</strong> la opción correcta sería <strong>4L</strong>. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, 
+            cuando ese sea el caso, selecciona cualquiera de los estímulos. 
+            En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta.<p>`,
+            
+            ` <img style='width: 70%;' src="img/${images[2]}" alt="">`
+            ],
+            show_clickable_nav: true,
+            show_page_number: true,
+            button_label_previous: 'Anterior',
+            button_label_next: 'Siguiente',
+            page_label: 'Página'
+        }
+        var instructions_4 = {
+            type: 'instructions',
+            pages: [
+            `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE LETRAS Y NÚMEROS. 
+            
+            Presiona la opción que marque el orden inverso al modelo. Por ejemplo si el modelo es <strong>1L</strong> la opción correcta sería <strong>L1</strong>. 
+            Lo mismo pero de atrás hacia adelante. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, 
+            selecciona cualquiera de los estímulos. En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar 
+            tu respuesta. 
+            <p>`,
+            
+            ` <img style='width: 70%;' src="img/${images[3]}" alt="">`
+            ],
+            show_clickable_nav: true,
+            show_page_number: true,
+            button_label_previous: 'Anterior',
+            button_label_next: 'Siguiente',
+            page_label: 'Página'
+        }
+            
+// task trials
 
-            // Stimuli to be presented. This can be automated based on a stimuli list.
-            var stimuli_task_1 = [
-            { stimulus: "<center><strong><P style='font-size:30px; margin: 3px;'> 21 </P></strong><div id='app'></div></center>", 
-            choices: ['12', '21'], data: {test_part: 'test', correct_response: '1'}},
-            { stimulus: "<center><strong><P style='font-size:30px; margin: 3px;'> 77 </P></strong><div id='app'></div></center>", choices: ['77', '77'],
-            data: {test_part: 'test', correct_response: 'equal'}} // Ver como poner el correcto cuando los dos lo sean
-            ];
-
-            var stimuli_task_2 = [
-            { stimulus: "<center><strong><P style='font-size:30px; margin: 3px;'> 91 </P></strong><div id='app'></div></center>", 
-            choices: ['91', '19'], data: {test_part: 'test', correct_response: '1'}},
-            { stimulus: "<center><strong><P style='font-size:30px; margin: 3px;'> 11 </P></strong><div id='app'></div></center>", choices: ['11', '11'],
-            data: {test_part: 'test', correct_response: 'equal'}} // Ver como poner el correcto cuando los dos lo sean
-            ];
-
-        // task trials
         var task_1 = {
             on_load:  function() {
                 setUpEvents()
-                
             },
             type: 'html-button-response',
             stimulus: jsPsych.timelineVariable('stimulus'),
             choices: jsPsych.timelineVariable('choices'),
             
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
-            margin_horizontal: '20px',
+            margin_horizontal: MARGIN_HORIZ,
             margin_vertical: '16px',
             trial_duration: TIME_LIMIT*1000,
             data: jsPsych.timelineVariable('data'),
             on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
                 clearInterval(timerInterval)
-                if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
-                    data.correct = true
-                } else{
-                    data.correct = data.button_pressed == data.correct_response;
+                if(data.button_pressed == null){ //if any key was pressed, the result (value of 'correct' variable) is false
+                    data.correct = false
+                } else {
+
+                    if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
+                        data.correct = true
+                    } else{
+                        data.correct = data.button_pressed == data.correct_response;
+                    }
                 }
                 console.log(data.correct)
+                console.log(data.correct_response)
 
             }
         }
@@ -279,7 +316,7 @@ let timerInterval;
             choices: jsPsych.timelineVariable('choices'),
             
             button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
-            margin_horizontal: '20px',
+            margin_horizontal: MARGIN_HORIZ,
             margin_vertical: '16px',
             trial_duration: TIME_LIMIT*1000,
             data: jsPsych.timelineVariable('data'),
@@ -296,10 +333,66 @@ let timerInterval;
                 
             }
         }
+        var task_3 = {
+            on_load:  function() {
+                setUpEvents()
+                
+            },
+            type: 'html-button-response',
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            choices: jsPsych.timelineVariable('choices'),
+            
+            button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+            margin_horizontal: MARGIN_HORIZ,
+            margin_vertical: '16px',
+            trial_duration: TIME_LIMIT*1000,
+            data: jsPsych.timelineVariable('data'),
+            on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+                clearInterval(timerInterval)
+                if ( data.button_pressed == null){
+                    data.correct = false
+                }
+               
+                data.correct = data.button_pressed == data.correct_response;
+                
+                console.log(data.correct)
+                
+                
+            }
+        }
+        var task_4 = {
+            on_load:  function() {
+                setUpEvents()
+                
+            },
+            type: 'html-button-response',
+            stimulus: jsPsych.timelineVariable('stimulus'),
+            choices: jsPsych.timelineVariable('choices'),
+            
+            button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+            margin_horizontal: MARGIN_HORIZ,
+            margin_vertical: '16px',
+            trial_duration: TIME_LIMIT*1000,
+            data: jsPsych.timelineVariable('data'),
+            on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+                clearInterval(timerInterval)
+                if (data.correct_response == 'equal'){
+                    data.correct = true
+                } else{
+                    data.correct = data.button_pressed == data.correct_response;
+                    
+                }
+                console.log(data.correct)
+                console.log(data.correct_response)
+                
+                
+            }
+        }
 
-        // procedures
+// procedures
+
         var test_procedure_1 = {
-            timeline: [task_1],
+            timeline: [task_1], //from stimuli.js
             timeline_variables: stimuli_task_1
             }
 
@@ -308,33 +401,175 @@ let timerInterval;
             timeline_variables: stimuli_task_2
             }
 
-            var debrief_block = {
-                type: "html-button-response",
-                stimulus: function() {
+        var test_procedure_3 = {
+            timeline: [task_3],
+            timeline_variables: stimuli_task_3
+            }
 
-                    var trials = jsPsych.data.get().filter({test_part: 'test'});
-                    var correct_trials = trials.filter({correct: true});
-                    var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-                    var rt = Math.round(trials.select('rt').mean()); //change this if you want only time of correct
+        var test_procedure_4 = {
+            timeline: [task_4],
+            timeline_variables: stimuli_task_4
+            }
+        
+        // last block with results
+
+        var debrief_block = {
+            type: "html-button-response",
+            on_load: function() {
+                var trials = jsPsych.data.get().filter({test_part: 'test'});
+                var correct_trials = trials.filter({correct: true});
+                var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+                var rt = Math.round(trials.select('rt').mean()); //change this if you want only time of correct
+                
+                var can = document.getElementById('canvas'),
+                    spanProcent = document.getElementById('procent'),
+                    c = can.getContext('2d');
+
+                    can.width = 200
+                    can.height = 200
+
+                    // c.font = 'italic 40pt Calibri, sans-serif';
+                    // c.fillText('Hello World!', 150, 150);
+                
+                var posX = can.width / 2,
+                    posY = can.height / 2,
+                    fps = 1000 / 200,
+                    procent = 0,
+                    oneProcent = 360 / 100,
+                    result = oneProcent * accuracy;
+                    console.log(accuracy)
+                
+                c.lineCap = 'round';
+                arcMove();
+                
+                function arcMove(){
+                    var deegres = 0;
+                    var acrInterval = setInterval (function() {
+                    deegres += 1;
+                    c.clearRect( 0, 0, can.width, can.height );
+                    procent = deegres / oneProcent;
+
+                    spanProcent.innerHTML = procent.toFixed();
+
+                    c.beginPath();
+                    c.arc( posX, posY, 70, (Math.PI/180) * 270, (Math.PI/180) * (270 + 360) );
+                    c.strokeStyle = '#b1b1b1';
+                    c.lineWidth = '10';
+                    c.stroke();
+
+                    c.beginPath();
+                    c.strokeStyle = '#3949AB';
+                    c.lineWidth = '10';
+                    c.arc( posX, posY, 70, (Math.PI/180) * 270, (Math.PI/180) * (270 + deegres) );
+                    c.stroke();
+                    if( deegres >= result ) clearInterval(acrInterval);
+                    }, fps);
                     
+                }
 
-                    // Separar en distintos globos de colores.
-                    return "<div style = 'background-color: green; border-radius: 15px 50px; padding: 20px;' ><p style='color:white;text-align:center;'>Respondiste correctamente en el  "+accuracy+"% de los ensayos.</p>"+
-                    "<p style='color:white;text-align:center;'>Tu tiempo de respuesta promedio fue de "+rt+" milisegundos.</p>"+
-                    "<p style='color:white;text-align:center;'> Muchas gracias!</p> </div>"
+                let can2 = document.getElementById('canvas2')
+                ctx = can2.getContext('2d');
+                spanProcent2 = document.getElementById('procent2'),
+                can2.width = 200
+                can2.height = 200
 
-                    },
-            
-                choices: ['Enviar datos y terminar']
-                };
+                var posX2 = can2.width / 2,
+                    posY2 = can2.height / 2,
+                    fps2 = 1000 / 200,
+                    procent2 = 0,
+                    oneProcent2 = 360 / 4000,
+                    result2 = oneProcent2 * rt;
+                    console.log(rt)
+                
+                ctx.lineCap = 'round';
+                arcMove2();
+
+                function arcMove2(){
+                    var deegres2 = 0;
+                    var acrInterval2 = setInterval (function() {
+                    deegres2 += 1;
+                    ctx.clearRect( 0, 0, can2.width, can2.height );
+                    procent2 = deegres2 / oneProcent2;
+
+                    spanProcent2.innerHTML = procent2.toFixed();
+
+                    ctx.beginPath();
+                    ctx.arc( posX, posY, 70, (Math.PI/180) * 270, (Math.PI/180) * (270 + 360) );
+                    ctx.strokeStyle = '#b1b1b1';
+                    ctx.lineWidth = '10';
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#3949AB';
+                    ctx.lineWidth = '10';
+                    ctx.arc( posX2, posY2, 70, (Math.PI/180) * 270, (Math.PI/180) * (270 + deegres2) );
+                    ctx.stroke();
+                    if( deegres2 >= result2 ) clearInterval(acrInterval2);
+                    }, fps2);
+                    
+                }
+                
+
+                },
+            stimulus: function() {
+
+                var trials = jsPsych.data.get().filter({test_part: 'test'});
+                var correct_trials = trials.filter({correct: true});
+                var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+                var rt = Math.round(trials.select('rt').mean()); //change this if you want only time of correct
+
+                
+                // Lo mas razonable seria poner otro canvas igualito pero ahora con el tiempo en lugar del porcentaje.
+                return `
+
+                <table>
+                <tr>
+                    <td>
+                <p class= 'responseText'>Respuestas correctas</p>
+                <div class="canvas-wrap">
+                <canvas id="canvas" width="300" height="300"></canvas>
+                <span id="procent"></span> 
+                </div>   
+                    </td>
+                <td>
+                     
+                <p class= 'responseText'>Tiempo promedio</p>
+                <div class="canvas-wrap">
+                <canvas id="canvas2" width="200" height="200"></canvas>
+                <span id="procent2">${rt}</span>    
+                </div>
+                        
+                    </td>
+                </tr>
+            </table>
+
+                </div> 
+                        `                
+                },
+
+
+                    // <p>Tiempo promedio en responder</p>
+                    // <div class="numberCircle">${rt} ms</div>
+                // "<div style = 'background-color: green; border-radius: 15px 50px; padding: 20px;' ><p style='color:white;text-align:center;'>Respondiste correctamente en el  "+accuracy+"% de los ensayos.</p>"+
+                // "<p style='color:white;text-align:center;'>Tu tiempo de respuesta promedio fue de "+rt+" milisegundos.</p>"+
+                // "<p style='color:white;text-align:center;'> Muchas gracias!</p> </div>"
+
+                // },
+        
+            choices: ['Enviar datos y terminar']
+            };
 
         jsPsych.init({
 
-            timeline: [welcome_block,fullScreen,rotate,instructions_1,test_procedure_1,instructions_2,test_procedure_2,debrief_block],
-            // timeline: [fullScreen,test_procedure_1,debrief_block],
+            // timeline: [welcome_block,fullScreen,rotate,instructions_1,test_procedure_1,instructions_2,test_procedure_2,
+            // instructions_3,test_procedure_3,instructions_4,test_procedure_4,debrief_block],
+            // timeline: [fullScreen,test_procedure_1,test_procedure_2,debrief_block],
+            timeline: [test_procedure_1,debrief_block],
+            // timeline: [debrief_block],
             
             show_progress_bar: true,
             message_progress_bar: 'Porcentaje completado',
+
             on_finish: function(){
                 jsPsych.data.displayData();
                 //Go to URL
