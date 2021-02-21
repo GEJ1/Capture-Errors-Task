@@ -3,7 +3,7 @@ let stimuli_task_1 = [
     stimulus:
       "<center><strong><P style='font-size:30px; margin: 3px;'> 77 </P></strong><div id='app'></div></center>",
     choices: ["77", "77"],
-    correct_response: "equal",
+    data: { test_part: "test", correct_response: "equal" },
   },
   {
     stimulus:
