@@ -8,10 +8,10 @@
         <script src="jspsych/plugins/jspsych-fullscreen.js"></script>
         <script src="jspsych/plugins/jspsych-instructions_modified.js"></script> 
         <script src="jspsych/plugins/jspsych-survey-html-form.js"></script> 
+        <script src="jspsych/plugins/jspsych-preload.js"></script>
         <script src="stimuli.js"></script> 
 
 
-        <!-- <script src="timer.js"></script> -->
         <link rel="stylesheet" href="timer.css"></link>
     </head>
 
@@ -20,10 +20,10 @@
     <script>
 
 // ID
-let subject_id = jsPsych.randomization.randomID(15);
+let subject_id = jsPsych.randomization.randomID(10); // Take a lokk at the number of digits
 
 //task explanation images
-images = ['/img/Ej_1.png','/img/Ej_2.png','/img/Ej_3.png','/img/Ej_4.png']
+images = ['/img/Ej_1.png','/img/Ej_2.png','/img/Ej_3.png','/img/Ej_4.png','/img/Ej_5.png','/img/Ej_6.png','/img/Ej_7.png','/img/Ej_8.png']
 
 // SAVE dimensions
 jsPsych.data.addProperties({'ID': subject_id})
@@ -140,29 +140,37 @@ function setUpEvents(){
             }
         }
 
-// Rotate trial 
-    let rotate = {
-    on_load: function() {
-        let orientationHandler = function(){
-            if (event.target.screen.orientation.angle){
-                window.removeEventListener("orientationchange", orientationHandler)
-                jsPsych.finishTrial();  
-            }
+    // // the "auto_preload: true" setting tells the plugin to automatically find
+    // // stimuli to preload based the main experiment timeline (used in jsPsych.init)
+    var preload = {
+      type: "preload",
+      auto_preload: true,
+    };
+        
+
+        // Full screen trial
+        var fullScreen = {
+            type: 'fullscreen',
+            fullscreen_mode: true,
+            message: '<p>El experimento ira a pantalla completa cuando usted presione el boton que se encuentra debajo</p><br>',
+            button_label: 'Continuar a pantalla completa'    
         } 
-        window.addEventListener("orientationchange", orientationHandler)},
 
-    type: "html-button-response",
-    stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono para continuar </p><br><IMG vertical-align: middle; SRC="img/rotate.gif">',
-    choices: [] // [] in final version. No button needed, only rotated device. 
-};
-
-// Full screen trial
-var fullScreen = {
-    type: 'fullscreen',
-    fullscreen_mode: true,
-    message: '<p>El experimento ira a pantalla completa cuando usted presione el boton que se encuentra debajo</p><br>',
-    button_label: 'Continuar a pantalla completa'    
-} 
+        // Rotate trial 
+            let rotate = {
+            on_load: function() {
+                let orientationHandler = function(){
+                    if (event.target.screen.orientation.angle){
+                        window.removeEventListener("orientationchange", orientationHandler)
+                        jsPsych.finishTrial();  
+                    }
+                } 
+                window.addEventListener("orientationchange", orientationHandler)},
+        
+            type: "html-button-response",
+            stimulus: '<p>Por favor habilite la opcion de rotacion de pantalla y gire su telefono para continuar </p><br><IMG vertical-align: middle; SRC="img/rotate.gif">',
+            choices: [] // [] in final version. No button needed, only rotated device. 
+        };
 
 // Welcome
 var welcome_block = {
@@ -198,7 +206,9 @@ var instructions_1 = {
     type: 'instructions',
     pages: [
             ` 
-            <p style='font-size:100%;color:black'>  Les damos la bienvenida al experimento. [Agregar explicación general de las tareas].<br>` ,
+            <p style='font-size:100%;color:black'>  Les damos la bienvenida al experimento. <hr> 
+                La misma consistirá en elegir entre dos opciones en base a una consigna. Es importante que intente hacerlo lo más rápida 
+                y correctamente posible, al final del experimento podrá ver sus resultados.<br> <b>¡Suerte!</b><br>` ,
 
             `<p style='font-size:100%;color:black'>  A CONTINUACIÓN, VAS A ENCONTRAR UNA SERIE DE NÚMEROS. 
             Presiona la opción que sea igual al modelo. Por ejemplo, si el modelo es <strong> 1 3 </strong> la opción correcta sería <strong>1 3</strong>. 
@@ -224,7 +234,7 @@ var instructions_2 = {
             Los mismos números, pero de atrás hacia adelante. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, 
             cuando ese sea el caso, 
             selecciona cualquiera de los estímulos. En la pantalla habrá también un círculo que mostrará el tiempo que tienes 
-            disponible para dar tu respuesta. <p>`,
+            disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible. <p>`,
             
             ` <img style='width: 70%;' src="${images[1]}" alt="">`
             ],
@@ -243,7 +253,7 @@ var instructions_3 = {
     Presiona la opción que ordene primero los números de menor a mayor y luego las letras en orden alfabético. 
     Por ejemplo si el modelo es <strong>L4</strong> la opción correcta sería <strong>4L</strong>. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, 
     cuando ese sea el caso, selecciona cualquiera de los estímulos. 
-    En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta.<p>`,
+    En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible.<p>`,
     
     ` <img style='width: 70%;' src="${images[2]}" alt="">`
     ],
@@ -262,10 +272,93 @@ var instructions_4 = {
     Presiona la opción que marque el orden inverso al modelo. Por ejemplo si el modelo es <strong>1L</strong> la opción correcta sería <strong>L1</strong>. 
     Lo mismo pero de atrás hacia adelante. Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, 
     selecciona cualquiera de los estímulos. En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar 
-    tu respuesta. 
+    tu respuesta, intentá hacerlo lo más rápido y correctamente posible.
     <p>`,
     
     ` <img style='width: 70%;' src="${images[3]}" alt="">`
+    ],
+    show_clickable_nav: true,
+    show_page_number: true,
+    button_label_previous: 'Anterior',
+    button_label_next: 'Siguiente',
+    page_label: 'Página',
+    post_trial_gap: 1000
+}
+
+var instructions_5 = {
+    type: 'instructions',
+    pages: [
+    `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE NÚMEROS. 
+
+Presiona la opción que sea igual al modelo. Por ejemplo si el modelo es <strong>2 1 3</strong> la opción correcta sería <strong>2 1 3</strong>. 
+En algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, selecciona cualquiera de los estímulos. 
+En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible.
+<p>`,
+    
+    ` <img style='width: 70%;' src="${images[4]}" alt="">` 
+    ],
+    show_clickable_nav: true,
+    show_page_number: true,
+    button_label_previous: 'Anterior',
+    button_label_next: 'Siguiente',
+    page_label: 'Página',
+    post_trial_gap: 1000
+}
+
+var instructions_6 = {
+    type: 'instructions',
+    pages: [
+    `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE NÚMEROS. 
+
+Presiona la opción que marque el orden inverso al modelo. Por ejemplo si el modelo es <strong> 5 4 1 </strong> la opción correcta 
+sería <strong>1 4 5</strong>. Lo mismo pero de atrás hacia adelante.
+En algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, selecciona cualquiera de los estímulos. 
+En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible. 
+<p>`,
+    
+    ` <img style='width: 70%;' src="${images[5]}" alt="">` 
+    ],
+    show_clickable_nav: true,
+    show_page_number: true,
+    button_label_previous: 'Anterior',
+    button_label_next: 'Siguiente',
+    page_label: 'Página',
+    post_trial_gap: 1000
+}
+
+var instructions_7 = {
+    type: 'instructions',
+    pages: [
+    `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE LETRAS Y NÚMEROS. 
+
+        Presiona la opción que ordene primero los números de menor a mayor y luego las letras en orden alfabético. Por ejemplo si el modelo es
+        <strong> L 4 1 </strong> la opción correcta sería <strong>1 4 L</strong>. 
+        Nuevamente, en algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, selecciona cualquiera de los estímulos. 
+        En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible.
+        <p>`,
+    
+    ` <img style='width: 70%;' src="${images[6]}" alt="">` 
+    ],
+    show_clickable_nav: true,
+    show_page_number: true,
+    button_label_previous: 'Anterior',
+    button_label_next: 'Siguiente',
+    page_label: 'Página',
+    post_trial_gap: 1000
+}
+
+var instructions_8 = {
+    type: 'instructions',
+    pages: [
+    `<p style='font-size:100%;color:black'>  A CONTINUACIÓN VAS A ENCONTRAR UNA SERIE DE LETRAS Y NÚMEROS. 
+
+Presiona la opción que marque el orden inverso al modelo. Por ejemplo si el modelo es <strong> 1 L 4 </strong> la opción correcta 
+sería <strong>4 L 1</strong>. 
+En algunas ocasiones las dos opciones pueden ser correctas, cuando ese sea el caso, selecciona cualquiera de los estímulos. 
+En la pantalla habrá también un círculo que mostrará el tiempo que tienes disponible para dar tu respuesta, intentá hacerlo lo más rápido y correctamente posible.
+<p>`,
+    
+    ` <img style='width: 70%;' src="${images[7]}" alt="">` 
     ],
     show_clickable_nav: true,
     show_page_number: true,
@@ -391,6 +484,121 @@ var task_4 = {
         console.log(data.correct)
     }
 }
+var task_5 = {
+    on_load:  function() {
+        setUpEvents()
+        
+    },
+    type: 'html-button-response',
+    stimulus: jsPsych.timelineVariable('stimulus'),
+    choices: jsPsych.timelineVariable('choices'),
+    
+    button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+    margin_horizontal: MARGIN_HORIZ,
+    margin_vertical: '16px',
+    trial_duration: TIME_LIMIT*1000,
+    data: jsPsych.timelineVariable('data'),
+    on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+        clearInterval(timerInterval)
+        if (data.button_pressed == null){ // if any button was pressed, return false
+            data.correct = false
+        } else {
+            if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
+                data.correct = true
+            } else{
+                data.correct = data.button_pressed == data.correct_response;
+            }
+        }
+        console.log(data.correct)
+    }
+}
+
+var task_6 = {
+    on_load:  function() {
+        setUpEvents()
+        
+    },
+    type: 'html-button-response',
+    stimulus: jsPsych.timelineVariable('stimulus'),
+    choices: jsPsych.timelineVariable('choices'),
+    
+    button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+    margin_horizontal: MARGIN_HORIZ,
+    margin_vertical: '16px',
+    trial_duration: TIME_LIMIT*1000,
+    data: jsPsych.timelineVariable('data'),
+    on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+        clearInterval(timerInterval)
+        if (data.button_pressed == null){ // if any button was pressed, return false
+            data.correct = false
+        } else {
+            if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
+                data.correct = true
+            } else{
+                data.correct = data.button_pressed == data.correct_response;
+            }
+        }
+        console.log(data.correct)
+    }
+}
+
+var task_7 = {
+    on_load:  function() {
+        setUpEvents()
+        
+    },
+    type: 'html-button-response',
+    stimulus: jsPsych.timelineVariable('stimulus'),
+    choices: jsPsych.timelineVariable('choices'),
+    
+    button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+    margin_horizontal: MARGIN_HORIZ,
+    margin_vertical: '16px',
+    trial_duration: TIME_LIMIT*1000,
+    data: jsPsych.timelineVariable('data'),
+    on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+        clearInterval(timerInterval)
+        if (data.button_pressed == null){ // if any button was pressed, return false
+            data.correct = false
+        } else {
+            if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
+                data.correct = true
+            } else{
+                data.correct = data.button_pressed == data.correct_response;
+            }
+        }
+        console.log(data.correct)
+    }
+}
+
+var task_8 = {
+    on_load:  function() {
+        setUpEvents()
+        
+    },
+    type: 'html-button-response',
+    stimulus: jsPsych.timelineVariable('stimulus'),
+    choices: jsPsych.timelineVariable('choices'),
+    
+    button_html:`<button style="font-size:30px; class="jspsych-btn">%choice%</button>`,
+    margin_horizontal: MARGIN_HORIZ,
+    margin_vertical: '16px',
+    trial_duration: TIME_LIMIT*1000,
+    data: jsPsych.timelineVariable('data'),
+    on_finish: function(data) { // This function previosly receives startTimer, maybe doesn't work well now
+        clearInterval(timerInterval)
+        if (data.button_pressed == null){ // if any button was pressed, return false
+            data.correct = false
+        } else {
+            if (data.correct_response == 'equal'){ //This is the case for equal digits, e.g. 7 7.
+                data.correct = true
+            } else{
+                data.correct = data.button_pressed == data.correct_response;
+            }
+        }
+        console.log(data.correct)
+    }
+}
 
 // ************************************* procedures ************************************* \\
 
@@ -414,16 +622,36 @@ var task_4 = {
             timeline_variables: stimuli_task_4
             }
 
+        var test_procedure_5 = {
+            timeline: [task_5],
+            timeline_variables: stimuli_task_5
+            }
+
+        var test_procedure_6 = {
+            timeline: [task_6],
+            timeline_variables: stimuli_task_6
+            }
+
+        var test_procedure_7 = {
+            timeline: [task_7],
+            timeline_variables: stimuli_task_7
+            }
+
+        var test_procedure_8 = {
+            timeline: [task_8],
+            timeline_variables: stimuli_task_8
+            }
+
 // Trial before end            
 var greetings = {
 type: "html-button-response",
 stimulus: `<h3>El experimento finalizó. En la siguiente pantalla verá sus resultados.</h3>
-        <h2><strong>Es muy importante que luego de verlos presione en el botón <strong>Enviar datos y terminar</strong></h2>`,
+        <h2><strong>Es muy importante que luego de verlos presione en el botón <b>"Enviar datos y terminar"</b></h2>`,
 choices: ['<strong>Ver resultados</strong>']
 };
-        
-// Debrief trial
 
+
+// Debrief trial
         var debrief_block = {
             type: "html-button-response",
             on_load: function() {
@@ -529,7 +757,7 @@ choices: ['<strong>Ver resultados</strong>']
                 var rt = Math.round(trials.select('rt').mean()); //change this if you want only time of correct
 
                 
-                // Lo mas razonable seria poner otro canvas igualito pero ahora con el tiempo en lugar del porcentaje.
+                
                 return `
                 <div style= 'display: flex; align-items: center; justify-content: center;'>
                     <table>
@@ -557,7 +785,7 @@ choices: ['<strong>Ver resultados</strong>']
         </div> `                
                 },
         
-            choices: ['<strong>Enviar datos y terminar</strong>']
+            choices: ['<h3><b>Enviar datos y terminar</b></h3>']
             };
             // <p class= 'responseText'> ¡Muchas gracias por haber participado!<br> por favor presioná el botón de abajo para terminar</p>
 
@@ -565,13 +793,11 @@ choices: ['<strong>Ver resultados</strong>']
 
             // timeline: [welcome_block,fullScreen,rotate,instructions_1,test_procedure_1,instructions_2,test_procedure_2,
             // instructions_3,test_procedure_3,instructions_4,test_procedure_4,greetings,debrief_block],
-            timeline: [instructions_1,test_procedure_1,greetings,debrief_block],
-
-            // Image data should be preloaded
-            preload_images: images, 
+            // timeline: [preload,fullScreen,rotate,instructions_1,test_procedure_1, greetings,debrief_block],
             
             show_progress_bar: true,
             message_progress_bar: 'Porcentaje completado',
+            timeline: [instructions_1,instructions_2,instructions_3,instructions_4,instructions_5,instructions_6,instructions_7,instructions_8],
             on_finish: function(){
                 jsPsych.data.displayData();
                 //Go to URL
